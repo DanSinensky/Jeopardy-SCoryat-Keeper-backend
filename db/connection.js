@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import chalk from "chalk";
 
 const connectionString =
-  process.env.MONGO_DB_URL || "mongodb://127.0.0.1:27017/cocktail-backend-api";
+  process.env.MONGO_DB_URL || "mongodb://127.0.0.1:27017/Jeopardy-SCoryat-Keeper-backend";
 mongoose.set("returnOriginal", false);
 
 mongoose.connect(connectionString).catch((err) => {
