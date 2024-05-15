@@ -5,6 +5,7 @@
     "strPlayer1": "Player 1",
     "strPlayer2": "Player 2",
     "strPlayer3": "Player 3",
-    "strWinner": "Player 2"
+    "strWinner": "Player 2",
+    "strDate": "Date"
   }
 ]
