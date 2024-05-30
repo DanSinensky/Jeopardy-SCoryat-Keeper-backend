@@ -7,7 +7,7 @@ const UserSchema = new Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true },
   password_digest: { type: String, required: true },
-  score: [{ type: Schema.Types.ObjectId, ref: "score" }]
+  scores: [{ type: Schema.Types.ObjectId, ref: "scores" }]
 }, { timestamps: true });
 
 export default mongoose.model("users", UserSchema);

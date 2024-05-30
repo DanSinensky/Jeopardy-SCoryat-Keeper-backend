@@ -14,17 +14,14 @@ export const getUsers = async (req, res) => {
   }
 };
 
-// for development purposes
 let SALT_ROUNDS = 11;
 let TOKEN_KEY = "areallylonggoodkey";
 
-// for production
 if (process.env.NODE_ENV === "production") {
   SALT_ROUNDS = Number(process.env.SALT_ROUNDS);
   TOKEN_KEY = process.env.TOKEN_KEY;
 }
 
-// for JWT expiration
 const today = new Date();
 const exp = new Date(today);
 exp.setDate(today.getDate() + 30);
@@ -50,7 +47,7 @@ export const signUp = async (req, res) => {
       id: user._id,
       username: user.username,
       email: user.email,
-      score: user.score,
+      scores: user.scores,
       exp: parseInt(exp.getTime() / 1000),
     };
 
