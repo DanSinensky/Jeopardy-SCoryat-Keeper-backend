@@ -47,7 +47,7 @@ export const signUp = async (req, res) => {
       id: user._id,
       username: user.username,
       email: user.email,
-      scores: user.scores,
+      games: user.games,
       exp: parseInt(exp.getTime() / 1000),
     };
 
