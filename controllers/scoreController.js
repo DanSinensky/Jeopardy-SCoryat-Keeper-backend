@@ -13,16 +13,28 @@ export const getScores = async (req, res) => {
 
 export const createScore = async (req, res) => {
   try {
-    const { dollars, game, username } = req.body;
+    const { value, game, username } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
     const score = new Score({
-      dollars,
+      value,
       game,
-      username
-    })
-    await score.save()
-    
-  } catch {
+      user: user._id
+    });
+
+    await score.save();
+
+    user.scores.push(score._id);
+    await user.save();
+
+    res.status(201).json(score);
+
+  } catch (error) {
     console.log(error.message);
     res.status(400).json({ error: error.message });
   }
-}
+};
