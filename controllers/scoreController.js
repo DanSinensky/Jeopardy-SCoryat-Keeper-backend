@@ -38,3 +38,45 @@ export const createScore = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+export const updateScore = async (req, res) => {
+  try {
+    const { scoreId } = req.params;
+    const { dollars, game } = req.body;
+
+    const score = await Score.findById(scoreId);
+
+    if (!score) {
+      return res.status(404).json({ error: 'Score not found' });
+    }
+
+    if (dollars !== undefined) score.dollars = dollars;
+    if (game) score.game = game;
+
+    await score.save();
+
+    res.status(200).json(score);
+  } catch (error) {
+    console.log(error.message);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const deleteScore = async (req, res) => {
+  try {
+    const { scoreId } = req.params;
+
+    const score = await Score.findByIdAndDelete(scoreId);
+
+    if (!score) {
+      return res.status(404).json({ error: 'Score not found' });
+    }
+
+    await User.findByIdAndUpdate(score.user, { $pull: { scores: scoreId } });
+
+    res.status(200).json({ message: 'Score deleted successfully' });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
