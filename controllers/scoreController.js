@@ -13,7 +13,7 @@ export const getScores = async (req, res) => {
 
 export const createScore = async (req, res) => {
   try {
-    const { value, game, username } = req.body;
+    const { dollars, game, username } = req.body;
     const user = await User.findOne({ username });
 
     if (!user) {
@@ -21,7 +21,7 @@ export const createScore = async (req, res) => {
     }
 
     const score = new Score({
-      value,
+      dollars,
       game,
       user: user._id
     });
