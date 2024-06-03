@@ -7,5 +7,8 @@ router.get("/", userControllers.getUsers);
 router.post("/sign-up", userControllers.signUp);
 router.post("/sign-in", userControllers.signIn);
 router.get("/verify", userControllers.verify);
+router.get('/:userId', userControllers.getUserById);
+router.put('/:userId', userControllers.updateUser);
+router.delete('/:userId', userControllers.deleteUser);
 
 export default router;

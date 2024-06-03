@@ -1,13 +1,12 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-
 import User from '../models/User.js';
-
+import Score from '../models/Score.js';
 
 export const getUsers = async (req, res) => {
   try {
-    let getUsers = await User.find();
-    res.json(getUsers);
+    const users = await User.find();
+    res.json(users);
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: err.message });
@@ -47,7 +46,6 @@ export const signUp = async (req, res) => {
       id: user._id,
       username: user.username,
       email: user.email,
-      games: user.games,
       exp: parseInt(exp.getTime() / 1000),
     };
 
@@ -62,10 +60,9 @@ export const signUp = async (req, res) => {
 export const signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email: email }).select(
-      "username email password_digest score"
-    );
-    if (await bcrypt.compare(password, user.password_digest)) {
+    const user = await User.findOne({ email }).select("username email password_digest");
+    
+    if (user && await bcrypt.compare(password, user.password_digest)) {
       const payload = {
         id: user._id,
         username: user.username,
@@ -97,10 +94,10 @@ export const verify = async (req, res) => {
   }
 };
 
-export const getUserWithScores = async (req, res) => {
+export const getUserById = async (req, res) => {
   try {
     const { userId } = req.params;
-    const user = await User.findById(userId).populate('scores').exec();
+    const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -155,7 +152,7 @@ export const deleteUser = async (req, res) => {
 
     await Score.deleteMany({ user: user._id });
 
-    res.status(200).json({ message: 'User and associated scores deleted successfully' });
+    res.status(200).json({ message: 'User deleted successfully' });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: error.message });

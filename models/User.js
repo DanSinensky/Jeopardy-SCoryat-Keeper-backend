@@ -6,8 +6,7 @@ const UserSchema = new Schema({
   lastName: { type: String, required: false },
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true },
-  password_digest: { type: String, required: true },
-  scores: [{ type: Schema.Types.ObjectId, ref: "Score" }]
+  password_digest: { type: String, required: true }
 }, { timestamps: true });
 
-export default mongoose.model("users", UserSchema);
+export default mongoose.model("User", UserSchema);
