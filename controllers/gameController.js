@@ -3,7 +3,7 @@ import Score from '../models/Score.js';
 
 export const getGames = async (req, res) => {
   try {
-    const games = await Game.find().populate('scores');
+    const games = await Game.find().populate('scores').exec();
     res.json(games);
   } catch (err) {
     console.log(err);
@@ -13,12 +13,13 @@ export const getGames = async (req, res) => {
 
 export const createGame = async (req, res) => {
   try {
-    const { name, date } = req.body;
+    const { name, scrapedID, date, scores } = req.body;
 
     const game = new Game({
       name,
+      scrapedID,
       date,
-      scores: []
+      scores
     });
 
     await game.save();
@@ -33,23 +34,20 @@ export const createGame = async (req, res) => {
 export const updateGame = async (req, res) => {
   try {
     const { gameId } = req.params;
-    const { name, date } = req.body;
+    const { name, scrapedID, date, scores } = req.body;
 
-    const game = await Game.findById(gameId);
+    const updatedFields = { name, scrapedID, date, scores };
+
+    const game = await Game.findByIdAndUpdate(gameId, updatedFields, { new: true });
 
     if (!game) {
       return res.status(404).json({ error: 'Game not found' });
     }
 
-    if (name) game.name = name;
-    if (date) game.date = date;
-
-    await game.save();
-
     res.status(200).json(game);
   } catch (error) {
     console.log(error.message);
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -63,7 +61,7 @@ export const deleteGame = async (req, res) => {
       return res.status(404).json({ error: 'Game not found' });
     }
 
-    await Score.deleteMany({ game: game._id });
+    await Score.deleteMany({ _id: { $in: game.scores } });
 
     res.status(200).json({ message: 'Game and associated scores deleted successfully' });
   } catch (error) {
