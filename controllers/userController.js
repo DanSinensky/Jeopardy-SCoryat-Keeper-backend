@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 
 import User from '../models/User.js';
 import Score from '../models/Score.js';
+import Game from '../models/Game.js';
 
 const SALT_ROUNDS = process.env.NODE_ENV === "production" ? Number(process.env.SALT_ROUNDS) : 11;
 const TOKEN_KEY = process.env.NODE_ENV === "production" ? process.env.TOKEN_KEY : "areallylonggoodkey";
@@ -135,13 +136,14 @@ export const deleteUser = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const user = await User.findByIdAndDelete(userId).populate('scores').exec();
+    const user = await User.findByIdAndDelete(userId);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     await Score.deleteMany({ _id: { $in: user.scores } });
+    await Game.updateMany({ scores: { $in: user.scores } }, { $pull: { scores: { $in: user.scores } } });
 
     res.status(200).json({ message: 'User and associated scores deleted successfully' });
   } catch (error) {

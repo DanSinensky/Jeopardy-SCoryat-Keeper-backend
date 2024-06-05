@@ -1,5 +1,6 @@
 import Game from '../models/Game.js';
 import Score from '../models/Score.js';
+import User from '../models/User.js';
 
 export const getGames = async (req, res) => {
   try {
@@ -62,6 +63,7 @@ export const deleteGame = async (req, res) => {
     }
 
     await Score.deleteMany({ _id: { $in: game.scores } });
+    await User.updateMany({ scores: { $in: game.scores } }, { $pull: { scores: { $in: game.scores } } });
 
     res.status(200).json({ message: 'Game and associated scores deleted successfully' });
   } catch (error) {
