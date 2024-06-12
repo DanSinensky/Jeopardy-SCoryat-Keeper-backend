@@ -9,7 +9,7 @@ const seedData = async () => {
   await db.dropDatabase();
 
   const scorePromises = gameData.map(game => {
-    const scoreDocs = game.scores.map(score => ({ dollars: score.dollars }));
+    const scoreDocs = game.scores ? game.scores.map(score => ({ dollars: score.dollars })) : [];
     return ScoreSchema.insertMany(scoreDocs);
   });
 
