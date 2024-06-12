@@ -1,7 +1,9 @@
 import db from "../db/connection.js";
 import GameSchema from "../models/Game.js";
 import ScoreSchema from "../models/Score.js";
-import gameData from "./gameData.json" assert {type: "json"};
+import fs from "fs";
+
+const gameData = JSON.parse(fs.readFileSync("./seed/gameData.json", "utf8"));
 
 const seedData = async () => {
   await db.dropDatabase();
@@ -42,7 +44,7 @@ const seedData = async () => {
   });
 
   await GameSchema.create(newGameData);
-  console.log("Games seeded to Database");
+  console.log("Games seeded to database");
 
   await db.close();
 };
