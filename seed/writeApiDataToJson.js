@@ -1,5 +1,6 @@
 import axios from "axios";
 import fs from "fs";
+import path from "path";
 
 const apiGamesUrl = "https://jeopardy-scoryat-webscraper-464ba2509006.herokuapp.com/api/games";
 const pageSize = 100; 
@@ -25,11 +26,13 @@ function filterGamesData(data) {
 function writeGamesDataToJsonFile(data) {
   const gamesJsonData = JSON.stringify(data, null, 2);
 
-  fs.writeFile("gamesData.json", gamesJsonData, (err) => {
+  const filePath = path.join(__dirname, "seed", "gameData.json");
+
+  fs.writeFile(filePath, gamesJsonData, (err) => {
     if (err) {
       throw new Error(`Failed to write data to JSON file: ${err.message}`);
     }
-    console.log("Data written to gamesData.json successfully");
+    console.log("Data written to gameData.json successfully");
   });
 }
 
