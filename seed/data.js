@@ -7,8 +7,20 @@ const gameData = JSON.parse(fs.readFileSync("./seed/gameData.json", "utf8"));
 
 const seedData = async () => {
   try {
+    const existingGames = await GameSchema.find().populate('scores').exec();
+    const existingScores = [];
+    existingGames.forEach(game => {
+      game.scores.forEach(score => {
+        existingScores.push({
+          game_id: game.game_id,
+          score_id: score._id,
+          dollars: score.dollars
+        });
+      });
+    });
+
     await db.dropDatabase();
-    
+
     const scorePromises = gameData.map(game => {
       const scoreDocs = game.scores ? game.scores.map(score => ({ dollars: score.dollars })) : [];
       return ScoreSchema.insertMany(scoreDocs);
@@ -44,7 +56,21 @@ const seedData = async () => {
       };
     });
 
-    await GameSchema.create(newGameData);
+    const newGames = await GameSchema.create(newGameData);
+
+    for (const newGame of newGames) {
+      const gameScores = existingScores.filter(score => score.game_id === newGame.game_id);
+      for (const gameScore of gameScores) {
+        const scoreDoc = await ScoreSchema.findById(gameScore.score_id);
+        if (scoreDoc) {
+          scoreDoc.dollars = gameScore.dollars;
+          await scoreDoc.save();
+          newGame.scores.push(scoreDoc._id);
+        }
+      }
+      await newGame.save();
+    }
+
     console.log("Games seeded to database");
 
   } catch (error) {
