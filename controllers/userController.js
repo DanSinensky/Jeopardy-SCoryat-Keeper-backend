@@ -36,7 +36,7 @@ export const signUp = async (req, res) => {
     });
 
     await user.save();
-    await user.populate('scores').execPopulate();
+    await user.populate('scores');
 
     const payload = {
       firstName: user.firstName,
@@ -91,7 +91,7 @@ export const verify = async (req, res) => {
   }
 };
 
-export const getUserWithScores = async (req, res) => {
+export const getUser = async (req, res) => {
   try {
     const { userId } = req.params;
     const user = await User.findById(userId).populate('scores').exec();
