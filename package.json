@@ -8,6 +8,10 @@
     "dev": "nodemon server.js",
     "db:seed": "node seed/data.js"
   },
+  "engines": {
+    "node": ">=22.2.0",
+    "npm": ">=10.8.1"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
