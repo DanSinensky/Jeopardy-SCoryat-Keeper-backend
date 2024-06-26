@@ -3,6 +3,7 @@ import GameSchema from "../models/Game.js";
 import ScoreSchema from "../models/Score.js";
 import UserSchema from "../models/User.js";
 import fs from "fs";
+import _ from "lodash";
 
 const gameData = JSON.parse(fs.readFileSync("./seed/gameData.json", "utf8"));
 
@@ -33,14 +34,21 @@ const seedData = async () => {
     for (const game of gameData) {
       let existingGame = await GameSchema.findOne({ game_id: game.game_id }).exec();
       if (existingGame) {
-        existingGame.game_title = game.game_title;
-        existingGame.game_date = game.game_date;
-        existingGame.game_comments = game.game_comments;
-        existingGame.categories = game.categories;
-        existingGame.category_comments = game.category_comments;
-        existingGame.jeopardy_round = game.jeopardy_round;
-        existingGame.double_jeopardy_round = game.double_jeopardy_round;
-        existingGame.final_jeopardy = game.final_jeopardy;
+        if (!_.isEqual(existingGame.categories, game.categories)) {
+          existingGame.categories = game.categories;
+        }
+        if (!_.isEqual(existingGame.category_comments, game.category_comments)) {
+          existingGame.category_comments = game.category_comments;
+        }
+        if (!_.isEqual(existingGame.jeopardy_round, game.jeopardy_round)) {
+          existingGame.jeopardy_round = game.jeopardy_round;
+        }
+        if (!_.isEqual(existingGame.double_jeopardy_round, game.double_jeopardy_round)) {
+          existingGame.double_jeopardy_round = game.double_jeopardy_round;
+        }
+        if (!_.isEqual(existingGame.final_jeopardy, game.final_jeopardy)) {
+          existingGame.final_jeopardy = game.final_jeopardy;
+        }
 
         for (const score of game.scores) {
           let existingScore = existingGame.scores.find(s => s._id.equals(score._id));
