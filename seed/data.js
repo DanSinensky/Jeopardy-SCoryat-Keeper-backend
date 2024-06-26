@@ -30,56 +30,38 @@ const seedData = async () => {
       }));
     });
 
-    await db.dropDatabase();
+    for (const game of gameData) {
+      let existingGame = await GameSchema.findOne({ game_id: game.game_id }).exec();
+      if (existingGame) {
+        existingGame.game_title = game.game_title;
+        existingGame.game_date = game.game_date;
+        existingGame.game_comments = game.game_comments;
+        existingGame.categories = game.categories;
+        existingGame.category_comments = game.category_comments;
+        existingGame.jeopardy_round = game.jeopardy_round;
+        existingGame.double_jeopardy_round = game.double_jeopardy_round;
+        existingGame.final_jeopardy = game.final_jeopardy;
 
-    const scorePromises = gameData.map(game => {
-      const scoreDocs = game.scores ? game.scores.map(score => ({ dollars: score.dollars })) : [];
-      return ScoreSchema.insertMany(scoreDocs);
-    });
-
-    const allScores = await Promise.all(scorePromises);
-
-    const newGameData = gameData.map((game, index) => {
-      const gameScores = allScores[index].map(scoreDoc => scoreDoc._id);
-
-      return {
-        game_title: game.game_title,
-        game_id: game.game_id,
-        game_date: game.game_date,
-        scores: gameScores,
-        game_comments: game.game_comments,
-        categories: game.categories,
-        category_comments: game.category_comments,
-        jeopardy_round: {
-          clues: game.jeopardy_round?.clues || [],
-          responses: game.jeopardy_round?.responses || [],
-          cells: game.jeopardy_round?.cells || []
-        },
-        double_jeopardy_round: {
-          clues: game.double_jeopardy_round?.clues || [],
-          responses: game.double_jeopardy_round?.responses || [],
-          cells: game.double_jeopardy_round?.cells || []
-        },
-        final_jeopardy: {
-          clue: game.final_jeopardy?.clue || "",
-          response: game.final_jeopardy?.response || ""
+        for (const score of game.scores) {
+          let existingScore = existingGame.scores.find(s => s._id.equals(score._id));
+          if (existingScore) {
+            existingScore.dollars = score.dollars;
+            await existingScore.save();
+          } else {
+            const newScore = await ScoreSchema.create({ dollars: score.dollars });
+            existingGame.scores.push(newScore._id);
+          }
         }
-      };
-    });
 
-    const newGames = await GameSchema.create(newGameData);
-
-    for (const newGame of newGames) {
-      const gameScores = existingScores.filter(score => score.game_id === newGame.game_id);
-      for (const gameScore of gameScores) {
-        const scoreDoc = await ScoreSchema.findById(gameScore.score_id);
-        if (scoreDoc) {
-          scoreDoc.dollars = gameScore.dollars;
-          await scoreDoc.save();
-          newGame.scores.push(scoreDoc._id);
-        }
+        await existingGame.save();
+      } else {
+        const newScores = await ScoreSchema.insertMany(game.scores.map(score => ({ dollars: score.dollars })));
+        const newGame = new GameSchema({
+          ...game,
+          scores: newScores.map(score => score._id)
+        });
+        await newGame.save();
       }
-      await newGame.save();
     }
 
     for (const [userId, scores] of Object.entries(userScores)) {
