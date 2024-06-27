@@ -25,7 +25,7 @@ const seedData = async () => {
 
     const userScores = {};
     existingUsers.forEach(user => {
-      userScores[user._id] = user.scores.map(score => ({
+      userScores[user._id] = (user.scores || []).map(score => ({
         score_id: score._id,
         dollars: score.dollars
       }));
@@ -50,7 +50,7 @@ const seedData = async () => {
           existingGame.final_jeopardy = game.final_jeopardy;
         }
 
-        for (const score of game.scores) {
+        for (const score of game.scores || []) {
           let existingScore = existingGame.scores.find(s => s._id.equals(score._id));
           if (existingScore) {
             existingScore.dollars = score.dollars;
@@ -63,7 +63,7 @@ const seedData = async () => {
 
         await existingGame.save();
       } else {
-        const newScores = await ScoreSchema.insertMany(game.scores.map(score => ({ dollars: score.dollars })));
+        const newScores = await ScoreSchema.insertMany((game.scores || []).map(score => ({ dollars: score.dollars })));
         const newGame = new GameSchema({
           ...game,
           scores: newScores.map(score => score._id)
@@ -76,7 +76,7 @@ const seedData = async () => {
       const user = await UserSchema.findById(userId);
       if (user) {
         user.scores = [];
-        for (const score of scores) {
+        for (const score of scores || []) {
           const scoreDoc = await ScoreSchema.findById(score.score_id);
           if (scoreDoc) {
             scoreDoc.dollars = score.dollars;
