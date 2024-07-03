@@ -12,6 +12,34 @@ export const getScores = async (req, res) => {
   }
 };
 
+export const getScoreById = async (req, res) => {
+  try {
+    const { scoreId } = req.params;
+    const score = await Score.findById(scoreId);
+    if (!score) {
+      return res.status(404).json({ error: 'Score not found' });
+    }
+    res.json(score);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getScoresByGame = async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const game = await Game.findById(gameId).populate('scores').exec();
+    if (!game) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
+    res.json(game.scores);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 export const createScore = async (req, res) => {
   try {
     const { dollars, userId, gameId } = req.body;
