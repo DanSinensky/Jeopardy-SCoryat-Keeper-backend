@@ -12,6 +12,34 @@ export const getGames = async (req, res) => {
   }
 };
 
+export const getGameById = async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const game = await Game.findById(gameId).populate('scores').exec();
+    if (!game) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
+    res.json(game);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getGameByDate = async (req, res) => {
+  try {
+    const { date } = req.params;
+    const game = await Game.findOne({ game_date: new Date(date) }).populate('scores').exec();
+    if (!game) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
+    res.json(game);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 export const createGame = async (req, res) => {
   try {
     const { name, scrapedID, date, scores } = req.body;
