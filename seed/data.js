@@ -2,13 +2,36 @@ import db from "../db/connection.js";
 import GameSchema from "../models/Game.js";
 import ScoreSchema from "../models/Score.js";
 import UserSchema from "../models/User.js";
-import fs from "fs";
+import AWS from 'aws-sdk';
 import _ from "lodash";
 
-const gameData = JSON.parse(fs.readFileSync("./seed/gameData.json", "utf8"));
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
+
+const bucketName = process.env.S3_BUCKET_NAME;
+const fileName = 'gameData.json';
+
+async function fetchGameDataFromS3() {
+  const params = {
+    Bucket: bucketName,
+    Key: fileName,
+  };
+
+  try {
+    const data = await s3.getObject(params).promise();
+    return JSON.parse(data.Body.toString('utf-8'));
+  } catch (error) {
+    throw new Error(`Failed to fetch data from S3: ${error.message}`);
+  }
+}
 
 const seedData = async () => {
   try {
+    const gameData = await fetchGameDataFromS3();
+
     const existingGames = await GameSchema.find().populate('scores').exec();
     const existingUsers = await UserSchema.find().populate('scores').exec();
     const existingScores = [];

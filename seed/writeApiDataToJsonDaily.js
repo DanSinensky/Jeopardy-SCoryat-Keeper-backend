@@ -3,9 +3,15 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import dayjs from "dayjs";
+import AWS from 'aws-sdk';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+});
 
 const previousDay = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
 
@@ -45,6 +51,7 @@ function appendGamesDataToJsonFile(newData) {
 
       fs.writeFile(filePath, updatedData, 'utf8', writeErr => {
         if (writeErr) throw new Error(`Failed to write data to JSON file: ${writeErr.message}`);
+        console.log(`Writing to file: ${filePath}`);
         console.log("Data appended to gameData.json successfully");
       });
     }

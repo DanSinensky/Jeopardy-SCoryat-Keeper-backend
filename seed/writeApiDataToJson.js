@@ -2,9 +2,16 @@ import axios from "axios";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import AWS from 'aws-sdk';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+});
 
 const apiGamesUrl = "https://jeopardy-scoryat-webscraper-464ba2509006.herokuapp.com/api/games";
 const pageSize = 100; 
@@ -29,14 +36,18 @@ function filterGamesData(data) {
 
 function writeGamesDataToJsonFile(data) {
   const gamesJsonData = JSON.stringify(data, null, 2);
+  const params = {
+    Bucket: process.env.S3_BUCKET_NAME,
+    Key: 'gameData.json',
+    Body: gamesJsonData,
+    ContentType: 'application/json'
+  };
 
-  const filePath = path.join(__dirname, "gameData.json");
-
-  fs.writeFile(filePath, gamesJsonData, (err) => {
+  s3.upload(params, (err, data) => {
     if (err) {
-      throw new Error(`Failed to write data to JSON file: ${err.message}`);
+      throw new Error(`Failed to upload data to S3: ${err.message}`);
     }
-    console.log("Data written to gameData.json successfully");
+    console.log(`Data uploaded to S3 successfully: ${data.Location}`);
   });
 }
 
