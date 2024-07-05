@@ -1,20 +1,29 @@
 import mongoose from "mongoose";
 import chalk from "chalk";
 
-const connectionString =
-  process.env.MONGO_DB_URL || "mongodb://127.0.0.1:27017/Jeopardy-SCoryat-Keeper-backend";
+const connectionString = process.env.MONGO_DB_URL || "mongodb://127.0.0.1:27017/Jeopardy-SCoryat-Keeper-backend";
+
 mongoose.set("returnOriginal", false);
 
-mongoose.connect(connectionString).catch((err) => {
-  console.log(chalk.red("Error connecting to MongoDB: ", err.message));
-});
+const connectToDB = async () => {
+  try {
+    await mongoose.connect(connectionString, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log(chalk.green("Connected to MongoDB"));
+  } catch (err) {
+    console.error(chalk.red("Error connecting to MongoDB:", err.message));
+    process.exit(1);
+  }
 
-mongoose.connection.on("disconnected", () => {
-  console.log(chalk.bold("disconnected from MongoDB"));
-});
+  mongoose.connection.on("disconnected", () => {
+    console.log(chalk.bold("Disconnected from MongoDB"));
+  });
 
-mongoose.connection.on("error", () => {
-  console.log(chalk.red(`Error with mongoDb `));
-});
+  mongoose.connection.on("error", (err) => {
+    console.error(chalk.red(`Error with MongoDB: ${err.message}`));
+  });
+};
 
-export default mongoose.connection;
+export default connectToDB;

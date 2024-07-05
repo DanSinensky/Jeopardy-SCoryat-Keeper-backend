@@ -1,4 +1,4 @@
-import db from "../db/connection.js";
+import connectToDB from "../db/connection.js";
 import GameSchema from "../models/Game.js";
 import ScoreSchema from "../models/Score.js";
 import UserSchema from "../models/User.js";
@@ -21,6 +21,7 @@ async function fetchGameDataFromS3() {
   };
 
   try {
+    console.log('Fetching game data from S3');
     const data = await s3.getObject(params).promise();
     return JSON.parse(data.Body.toString('utf-8'));
   } catch (error) {
@@ -30,7 +31,8 @@ async function fetchGameDataFromS3() {
 
 const seedData = async () => {
   try {
-    await db.connect();
+    await connectToDB();
+
     const gameData = await fetchGameDataFromS3();
 
     const existingGames = await GameSchema.find().populate('scores').exec();
@@ -130,7 +132,9 @@ const seedData = async () => {
   } catch (error) {
     console.error("Error seeding data: ", error);
   } finally {
-    await db.close();
+    mongoose.connection.close(() => {
+      console.log('MongoDB connection closed');
+    });
   }
 };
 
