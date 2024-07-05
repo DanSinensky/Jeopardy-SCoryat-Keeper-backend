@@ -30,6 +30,7 @@ async function fetchGameDataFromS3() {
 
 const seedData = async () => {
   try {
+    await db.connect();
     const gameData = await fetchGameDataFromS3();
 
     const existingGames = await GameSchema.find().populate('scores').exec();
@@ -57,20 +58,27 @@ const seedData = async () => {
     for (const game of gameData) {
       let existingGame = await GameSchema.findOne({ game_id: game.game_id }).exec();
       if (existingGame) {
+        let updated = false;
+
         if (!_.isEqual(existingGame.categories, game.categories)) {
           existingGame.categories = game.categories;
+          updated = true;
         }
         if (!_.isEqual(existingGame.category_comments, game.category_comments)) {
           existingGame.category_comments = game.category_comments;
+          updated = true;
         }
         if (!_.isEqual(existingGame.jeopardy_round, game.jeopardy_round)) {
           existingGame.jeopardy_round = game.jeopardy_round;
+          updated = true;
         }
         if (!_.isEqual(existingGame.double_jeopardy_round, game.double_jeopardy_round)) {
           existingGame.double_jeopardy_round = game.double_jeopardy_round;
+          updated = true;
         }
         if (!_.isEqual(existingGame.final_jeopardy, game.final_jeopardy)) {
           existingGame.final_jeopardy = game.final_jeopardy;
+          updated = true;
         }
 
         for (const score of game.scores || []) {
@@ -81,10 +89,14 @@ const seedData = async () => {
           } else {
             const newScore = await ScoreSchema.create({ dollars: score.dollars });
             existingGame.scores.push(newScore._id);
+            updated = true;
           }
         }
 
-        await existingGame.save();
+        if (updated) {
+          await existingGame.save();
+          console.log(`Game with ID ${game.game_id} updated.`);
+        }
       } else {
         const newScores = await ScoreSchema.insertMany((game.scores || []).map(score => ({ dollars: score.dollars })));
         const newGame = new GameSchema({
@@ -92,6 +104,7 @@ const seedData = async () => {
           scores: newScores.map(score => score._id)
         });
         await newGame.save();
+        console.log(`Game with ID ${game.game_id} created.`);
       }
     }
 
@@ -108,6 +121,7 @@ const seedData = async () => {
           }
         }
         await user.save();
+        console.log(`User with ID ${userId} updated.`);
       }
     }
 
