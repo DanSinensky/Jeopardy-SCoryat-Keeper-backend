@@ -1,5 +1,4 @@
-//imports
-import db from "./db/connection.js";
+import { db, connectToDB } from "./db/connection.js";
 import express from "express";
 import routes from "./routes/index.js";
 import cors from "cors";
@@ -9,12 +8,13 @@ import chalk from "chalk";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-//MIDDLEWARE
 app.use(express.json());
 app.use(cors());
 app.use(logger("dev"));
 
 app.use("/api", routes);
+
+connectToDB();
 
 db.on("connected", () => {
   console.clear();

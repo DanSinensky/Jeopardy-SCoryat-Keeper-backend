@@ -26,4 +26,6 @@ const connectToDB = async () => {
   });
 };
 
-export default connectToDB;
+const db = mongoose.connection;
+
+export { connectToDB, db };
