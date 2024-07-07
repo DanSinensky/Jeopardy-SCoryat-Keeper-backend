@@ -5,7 +5,7 @@ const connectionString = process.env.MONGO_DB_URL || "mongodb://127.0.0.1:27017/
 
 mongoose.set("returnOriginal", false);
 
-const connectToDB = async () => {
+export const connectToDB = async () => {
   try {
     await mongoose.connect(connectionString, {
       useNewUrlParser: true,
@@ -26,6 +26,4 @@ const connectToDB = async () => {
   });
 };
 
-const db = mongoose.connection;
-
-export { connectToDB, db };
+export const db = mongoose.connection;

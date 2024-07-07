@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import connectToDB from "../db/connection.js";
+import { connectToDB } from "../db/connection.js";
 import GameSchema from "../models/Game.js";
 import ScoreSchema from "../models/Score.js";
 import UserSchema from "../models/User.js";
