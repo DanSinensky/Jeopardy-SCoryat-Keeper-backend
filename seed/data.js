@@ -133,9 +133,12 @@ const seedData = async () => {
   } catch (error) {
     console.error("Error seeding data: ", error);
   } finally {
-    mongoose.connection.close(() => {
+    try {
+      await mongoose.connection.close();
       console.log('MongoDB connection closed');
-    });
+    } catch (closeError) {
+      console.error('Error closing MongoDB connection:', closeError);
+    }
   }
 };
 

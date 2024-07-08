@@ -7,10 +7,7 @@ mongoose.set("returnOriginal", false);
 
 export const connectToDB = async () => {
   try {
-    await mongoose.connect(connectionString, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(connectionString, {});
     console.log(chalk.green("Connected to MongoDB"));
   } catch (err) {
     console.error(chalk.red("Error connecting to MongoDB:", err.message));
