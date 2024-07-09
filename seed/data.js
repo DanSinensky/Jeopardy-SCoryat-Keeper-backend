@@ -33,8 +33,10 @@ async function fetchGameDataFromS3() {
 const seedData = async () => {
   try {
     await connectToDB();
+    console.log('Connected to MongoDB');
 
     const gameData = await fetchGameDataFromS3();
+    console.log('Game data fetched from S3:', gameData);
 
     const existingGames = await GameSchema.find().populate('scores').exec();
     const existingUsers = await UserSchema.find().populate('scores').exec();
@@ -124,7 +126,7 @@ const seedData = async () => {
           }
         }
         await user.save();
-        console.log(`User with ID ${userId} updated.`);
+        // console.log(`User with ID ${userId} updated.`);
       }
     }
 
