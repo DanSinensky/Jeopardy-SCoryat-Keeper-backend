@@ -35,32 +35,27 @@ const seedData = async () => {
     console.log('Connected to MongoDB');
 
     const gameData = await fetchGameDataFromS3();
-    console.log('Game data fetched from S3:', gameData);
+    console.log('Game data fetched from S3');
 
     for (const game of gameData) {
       let existingGame = await GameSchema.findOne({ game_id: game.game_id }).exec();
       if (existingGame) {
         let updated = false;
 
-        if (!_.isEqual(existingGame.categories, game.categories)) {
-          existingGame.categories = game.categories;
-          updated = true;
-        }
-        if (!_.isEqual(existingGame.category_comments, game.category_comments)) {
-          existingGame.category_comments = game.category_comments;
-          updated = true;
-        }
-        if (!_.isEqual(existingGame.jeopardy_round, game.jeopardy_round)) {
-          existingGame.jeopardy_round = game.jeopardy_round;
-          updated = true;
-        }
-        if (!_.isEqual(existingGame.double_jeopardy_round, game.double_jeopardy_round)) {
-          existingGame.double_jeopardy_round = game.double_jeopardy_round;
-          updated = true;
-        }
-        if (!_.isEqual(existingGame.final_jeopardy, game.final_jeopardy)) {
-          existingGame.final_jeopardy = game.final_jeopardy;
-          updated = true;
+        const fieldsToCompare = [
+          'categories',
+          'category_comments',
+          'jeopardy_round',
+          'double_jeopardy_round',
+          'final_jeopardy'
+        ];
+
+        for (const field of fieldsToCompare) {
+          if (!_.isEqual(existingGame[field], game[field])) {
+            console.log(`Field ${field} is different.`);
+            existingGame[field] = game[field];
+            updated = true;
+          }
         }
 
         for (const score of game.scores || []) {
