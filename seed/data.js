@@ -51,7 +51,7 @@ const seedData = async () => {
         ];
 
         for (const field of fieldsToCompare) {
-          if (!_.isEqual(existingGame[field], game[field])) {
+          if (!_.isEqual(JSON.stringify(existingGame[field], null, 2), JSON.stringify(game[field], null, 2))) {
             console.log(`Field ${field} is different.`);
             existingGame[field] = game[field];
             updated = true;
