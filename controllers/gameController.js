@@ -15,7 +15,7 @@ export const getGames = async (req, res) => {
 export const getGameById = async (req, res) => {
   try {
     const { gameId } = req.params;
-    const game = await Game.findById(gameId).populate('scores').exec();
+    const game = await Game.findOne({ game_id: gameId }).populate('scores').exec();
     if (!game) {
       return res.status(404).json({ error: 'Game not found' });
     }
