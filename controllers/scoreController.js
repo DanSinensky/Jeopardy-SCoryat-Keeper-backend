@@ -54,9 +54,28 @@ export const getScoresByGame = async (req, res) => {
   }
 };
 
+// export const getScoresByUser = async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+//     const user = await User.findById(userId).populate('scores').exec();
+//     if (!user) {
+//       return res.status(404).json({ error: 'User not found' });
+//     }
+//     res.json(user.scores);
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ error: err.message });
+//   }
+// };
+
 export const getScoresByUser = async (req, res) => {
   try {
     const { userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: 'Invalid User ID' });
+    }
+
     const user = await User.findById(userId).populate('scores').exec();
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
