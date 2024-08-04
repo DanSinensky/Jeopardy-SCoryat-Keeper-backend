@@ -112,14 +112,36 @@ export const createScore = async (req, res) => {
   }
 };
 
+// export const updateScore = async (req, res) => {
+//   try {
+//     const { scoreId } = req.params;
+//     const { dollars } = req.body;
+
+//     const score = await Score.findByIdAndUpdate(
+//       scoreId, 
+//       { dollars }, 
+//       { new: true, runValidators: true }
+//     );
+
+//     if (!score) {
+//       return res.status(404).json({ error: 'Score not found' });
+//     }
+
+//     res.status(200).json(score);
+//   } catch (error) {
+//     console.log(error.message);
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 export const updateScore = async (req, res) => {
   try {
-    const { scoreId } = req.params;
-    const { dollars } = req.body;
+    const { gameId, userId } = req.params;
+    const { newScore } = req.body;
 
-    const score = await Score.findByIdAndUpdate(
-      scoreId, 
-      { dollars }, 
+    const score = await Score.findOneAndUpdate(
+      { gameId, userId },
+      { dollars: newScore },
       { new: true, runValidators: true }
     );
 
