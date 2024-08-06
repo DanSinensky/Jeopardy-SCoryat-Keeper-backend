@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const GameSchema = new Schema({
   game_title: { type: String, required: true },
-  game_id: {type: Number, required: true},
+  game_id: { type: Number, required: true },
   game_date: { type: Date, required: true },
   scores: [{ type: Schema.Types.ObjectId, ref: 'Score' }],
   game_comments: { type: String },
@@ -21,7 +21,7 @@ const GameSchema = new Schema({
   },
   final_jeopardy: {
     clue: { type: String, required: true },
-    response: { type: String, required: true}
+    response: { type: String, required: true }
   }
 }, { timestamps: true });
 
