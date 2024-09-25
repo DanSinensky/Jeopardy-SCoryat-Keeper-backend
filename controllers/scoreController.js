@@ -30,7 +30,7 @@ export const getScoreById = async (req, res) => {
 export const getScoresByGame = async (req, res) => {
   try {
     const { gameId } = req.params;
-    const scores = await Score.find({ gameId }).populate('user', 'username').exec();
+    const scores = await Score.find({ game_id: gameId }).populate('user', 'username').exec();
     if (!scores.length) {
       return res.status(404).json({ error: 'Scores not found' });
     }
