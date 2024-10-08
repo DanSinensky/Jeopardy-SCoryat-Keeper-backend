@@ -59,6 +59,11 @@ export const signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email: email }).select("username email password_digest").populate('scores').exec();
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
     if (await bcrypt.compare(password, user.password_digest)) {
       const payload = {
         id: user._id,
