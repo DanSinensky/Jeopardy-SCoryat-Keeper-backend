@@ -149,6 +149,7 @@ export const deleteUser = async (req, res) => {
 
     await Score.deleteMany({ _id: { $in: user.scores } });
     await Game.updateMany({ scores: { $in: user.scores } }, { $pull: { scores: { $in: user.scores } } });
+    await Game.updateMany({ users: user._id }, { $pull: { users: user._id } });
 
     res.status(200).json({ message: 'User and associated scores deleted successfully' });
   } catch (error) {

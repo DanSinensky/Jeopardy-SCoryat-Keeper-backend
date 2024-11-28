@@ -42,13 +42,14 @@ export const getGameByDate = async (req, res) => {
 
 export const createGame = async (req, res) => {
   try {
-    const { name, scrapedID, date, scores } = req.body;
+    const { name, game_id, date, scores, users } = req.body;
 
     const game = new Game({
       name,
-      scrapedID,
+      game_id,
       date,
-      scores
+      scores,
+      users
     });
 
     await game.save();
@@ -63,9 +64,9 @@ export const createGame = async (req, res) => {
 export const updateGame = async (req, res) => {
   try {
     const { gameId } = req.params;
-    const { name, scrapedID, date, scores } = req.body;
+    const { name, date, scores, users } = req.body;
 
-    const updatedFields = { name, scrapedID, date, scores };
+    const updatedFields = { name, date, scores, users };
 
     const game = await Game.findByIdAndUpdate(gameId, updatedFields, { new: true });
 
@@ -92,6 +93,7 @@ export const deleteGame = async (req, res) => {
 
     await Score.deleteMany({ _id: { $in: game.scores } });
     await User.updateMany({ scores: { $in: game.scores } }, { $pull: { scores: { $in: game.scores } } });
+    await User.updateMany({ games: game._id }, { $pull: { games: game._id } });
 
     res.status(200).json({ message: 'Game and associated scores deleted successfully' });
   } catch (error) {

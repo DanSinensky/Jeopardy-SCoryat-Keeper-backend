@@ -5,6 +5,7 @@ const GameSchema = new Schema({
   game_title: { type: String, required: true },
   game_id: { type: Number, required: true },
   game_date: { type: Date, required: true },
+  users: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   scores: [{ type: Schema.Types.ObjectId, ref: 'Score' }],
   game_comments: { type: String },
   categories: [{ type: String, required: true }],

@@ -15,8 +15,8 @@ export const getScores = async (req, res) => {
 
 export const getScoreById = async (req, res) => {
   try {
-    const { scoreId } = req.params;
-    const score = await Score.findById(scoreId);
+    const { id } = req.params;
+    const score = await Score.findById(id);
     if (!score) {
       return res.status(404).json({ error: 'Score not found' });
     }
@@ -60,88 +60,107 @@ export const getScoresByUser = async (req, res) => {
   }
 };
 
-export const createOrUpdateScore = async (req, res) => {
-  const { userId, gameId, dollars } = req.body;
+// export const createOrUpdateScore = async (req, res) => {
+//   const { userId, gameId, dollars } = req.body;
 
-  try {
-    let existingScore = await Score.findOne({ userId, gameId });
-
-    if (existingScore) {
-      existingScore.dollars = dollars;
-      await existingScore.save();
-      await User.findByIdAndUpdate(userId, { $push: { scores: score._id } });
-      await Game.findByIdAndUpdate(gameId, { $push: { scores: score._id } });
-      return res.status(200).json({ message: 'Score updated successfully', score: existingScore });
-    } else {
-      const newScoreEntry = new Score({
-        userId,
-        gameId,
-        dollars: dollars
-      });
-
-      await newScoreEntry.save();
-      return res.status(201).json({ message: 'Score created successfully', score: newScoreEntry });
-    }
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
-};
-
-
-// export const createScore = async (req, res) => {
 //   try {
-//     const { dollars, userId, gameId } = req.body;
+//     let existingScore = await Score.findOne({ userId, gameId });
 
-//     const score = new Score({
-//       dollars,
-//       userId,
-//       gameId
-//     });
+//     if (existingScore) {
+//       existingScore.dollars = dollars;
+//       await existingScore.save();
+//       await User.findByIdAndUpdate(userId, { $push: { scores: score._id } });
+//       await Game.findByIdAndUpdate(gameId, { $push: { scores: score._id } });
+//       return res.status(200).json({ message: 'Score updated successfully', score: existingScore });
+//     } else {
+//       const newScoreEntry = new Score({
+//         userId,
+//         gameId,
+//         dollars: dollars
+//       });
 
-//     await score.save();
-
-//     await User.findByIdAndUpdate(userId, { $push: { scores: score._id } });
-//     await Game.findByIdAndUpdate(gameId, { $push: { scores: score._id } });
-
-//     res.status(201).json(score);
-//   } catch (error) {
-//     console.log(error.message);
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-// export const updateScore = async (req, res) => {
-//   try {
-//     const { userId, gameId, dollars } = req.body;
-
-//     const score = await Score.findOne({ userId, gameId });
-
-//     if (!score) {
-//       return res.status(404).json({ error: 'Score not found' });
+//       await newScoreEntry.save();
+//       return res.status(201).json({ message: 'Score created successfully', score: newScoreEntry });
 //     }
-
-//     score.dollars = dollars;
-//     await score.save();
-
-//     return res.status(200).json(score);
 //   } catch (error) {
-//     console.log(error.message);
-//     res.status(500).json({ error: error.message });
+//     return res.status(500).json({ error: error.message });
 //   }
 // };
 
-export const deleteScore = async (req, res) => {
-  try {
-    const { scoreId } = req.params;
 
-    const score = await Score.findByIdAndDelete(scoreId);
+export const createScore = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { dollars, user, game } = req.body;
+
+    if (!dollars || !user || !game) {
+      return res.status(400).json({ error: 'dollars, user, and game are required' });
+    }
+
+    const score = await Score.findByIdAndUpdate(
+      id,
+      { dollars, user, game },
+      { new: true, runValidators: true } // Ensure validators run on update
+    );
 
     if (!score) {
       return res.status(404).json({ error: 'Score not found' });
     }
 
-    await User.updateMany({ scores: scoreId }, { $pull: { scores: scoreId } });
-    await Game.updateMany({ scores: scoreId }, { $pull: { scores: scoreId } });
+    await score.save();
+
+    await User.findByIdAndUpdate(user, { $push: { scores: score._id } });
+    await Game.findByIdAndUpdate(game, { $push: { scores: score._id } });
+
+    res.status(200).json(score);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const updateScore = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ error: 'Invalid or missing score ID' });
+    }
+    
+    const { dollars, user, game  } = req.body;
+    if (!dollars || !user || !game) {
+      return res.status(400).json({ error: 'dollars, user, and game are required' });
+    }
+
+    const score = await Score.findByIdAndUpdate(id, { dollars, user, game }, { new: true });
+    if (!score) {
+      return res.status(404).json({ error: 'Score not found' });
+    }
+
+    score.dollars = dollars;
+    await score.save();
+
+    await User.findByIdAndUpdate(user, { $addToSet: { scores: score._id } });
+    await Game.findByIdAndUpdate(game, { $addToSet: { scores: score._id } });
+
+    return res.status(200).json(score);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const deleteScore = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const score = await Score.findByIdAndDelete(id);
+
+    if (!score) {
+      return res.status(404).json({ error: 'Score not found' });
+    }
+
+    await User.updateMany({ scores: id }, { $pull: { scores: scoreId } });
+    await Game.updateMany({ scores: id }, { $pull: { scores: scoreId } });
 
     res.status(200).json({ message: 'Score deleted successfully' });
   } catch (error) {
