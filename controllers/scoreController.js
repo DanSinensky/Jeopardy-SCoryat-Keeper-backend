@@ -30,7 +30,7 @@ export const getScoreById = async (req, res) => {
 export const getScoresByGame = async (req, res) => {
   try {
     const { gameId } = req.params;
-    const scores = await Score.find({ gameId });
+    const scores = await Score.find({ game: gameId });
     if (!scores.length) {
       return res.status(404).json({ error: 'Scores not found' });
     }
@@ -100,7 +100,7 @@ export const createScore = async (req, res) => {
     const score = await Score.findByIdAndUpdate(
       id,
       { dollars, user, game },
-      { new: true, runValidators: true } // Ensure validators run on update
+      { new: true, runValidators: true }
     );
 
     if (!score) {
